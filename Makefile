@@ -133,6 +133,12 @@ submodules/fetch: ## Fetch git submodules
 submodules/update: ## Update git submodules to the latest versions
 	git submodule update --remote --merge
 
+# Tree
+
+.PHONY: tree
+tree: ## Show project structure using `tree`
+	tree --gitignore -I external
+
 # Help
 
 help: ## Show this help
