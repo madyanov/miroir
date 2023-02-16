@@ -1,0 +1,7 @@
+.DS_Store
+build/
+.cache/
+tags
+coverage.info
+coverage/
+CMakeLists.txt.user

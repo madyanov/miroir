@@ -1,0 +1,6 @@
+[submodule "libs/yaml-cpp"]
+	path = external/yaml-cpp
+	url = https://github.com/jbeder/yaml-cpp.git
+[submodule "libs/doctest"]
+	path = external/doctest
+	url = https://github.com/doctest/doctest.git
