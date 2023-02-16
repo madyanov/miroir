@@ -127,7 +127,7 @@ coverage: ## Collect code coverage using `lcov`
 
 .PHONY: submodules/fetch
 submodules/fetch: ## Fetch git submodules
-	git submodule update --init --recursive
+	git submodule update --init --recursive --progress
 
 .PHONY: submodules/update
 submodules/update: ## Update git submodules to the latest versions
