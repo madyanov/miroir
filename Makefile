@@ -88,7 +88,7 @@ lint/tidy: configure ## Run `clang-tidy`
 		`$(SOURCES)`
 
 .PHONY: lint/spell
-lint/spell: configure ## Check spelling with `codespell`
+lint/spell: configure ## Check spelling using `codespell`
 	codespell \
 		`git ls-files -- "*.md" "*.txt" "*.json" "*.yml" "Makefile"` \
 		`$(SOURCES)`
