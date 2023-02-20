@@ -11,7 +11,7 @@
 
 static inline void validate(const std::string &schema_str, const std::string &doc_str) {
     const YAML::Node schema = YAML::Load(schema_str);
-    miroir::Validator<YAML::Node> validator{schema};
+    const miroir::Validator<YAML::Node> validator{schema};
     const YAML::Node doc = YAML::Load(doc_str);
     const std::vector<miroir::Error<YAML::Node>> errors = validator.validate(doc);
     CHECK(errors.empty());
@@ -22,7 +22,7 @@ static inline void validate(const std::string &schema_str, const std::string &do
 // any type
 TEST_CASE("any type validation") {
     const YAML::Node schema = YAML::Load("root: any");
-    miroir::Validator<YAML::Node> validator{schema};
+    const miroir::Validator<YAML::Node> validator{schema};
 
     SUBCASE("scalar value is valid") {
         const YAML::Node doc = YAML::Load("42.0");
@@ -46,7 +46,7 @@ TEST_CASE("any type validation") {
 // scalar type
 TEST_CASE("scalar type validation") {
     const YAML::Node schema = YAML::Load("root: scalar");
-    miroir::Validator<YAML::Node> validator{schema};
+    const miroir::Validator<YAML::Node> validator{schema};
 
     SUBCASE("scalar value is valid") {
         const YAML::Node doc = YAML::Load("42.0");
@@ -72,7 +72,7 @@ TEST_CASE("scalar type validation") {
 // numeric type
 TEST_CASE("numeric type validation") {
     const YAML::Node schema = YAML::Load("root: numeric");
-    miroir::Validator<YAML::Node> validator{schema};
+    const miroir::Validator<YAML::Node> validator{schema};
 
     SUBCASE("integer value is valid") {
         const YAML::Node doc = YAML::Load("42");
@@ -97,7 +97,7 @@ TEST_CASE("numeric type validation") {
 // integer type
 TEST_CASE("integer type validation") {
     const YAML::Node schema = YAML::Load("root: integer");
-    miroir::Validator<YAML::Node> validator{schema};
+    const miroir::Validator<YAML::Node> validator{schema};
 
     SUBCASE("integer value is valid") {
         const YAML::Node doc = YAML::Load("42");
@@ -123,7 +123,7 @@ TEST_CASE("integer type validation") {
 // boolean type
 TEST_CASE("boolean type validation") {
     const YAML::Node schema = YAML::Load("root: [boolean]");
-    miroir::Validator<YAML::Node> validator{schema};
+    const miroir::Validator<YAML::Node> validator{schema};
 
     SUBCASE("boolean values are valid") {
         const YAML::Node doc = YAML::Load("[ true, false, y, n, yes, no, on, off ]");
@@ -142,7 +142,7 @@ TEST_CASE("boolean type validation") {
 // string type
 TEST_CASE("string type validation") {
     const YAML::Node schema = YAML::Load("root: [string]");
-    miroir::Validator<YAML::Node> validator{schema};
+    const miroir::Validator<YAML::Node> validator{schema};
 
     SUBCASE("string values are valid") {
         const YAML::Node doc = YAML::Load("[ some string, '42', 'true', '42.0' ]");
@@ -164,7 +164,7 @@ TEST_CASE("string type validation") {
 // any sequence
 TEST_CASE("any sequence validation") {
     const YAML::Node schema = YAML::Load("root: []");
-    miroir::Validator<YAML::Node> validator{schema};
+    const miroir::Validator<YAML::Node> validator{schema};
 
     SUBCASE("sequence of integers is valid") {
         const YAML::Node doc = YAML::Load("[ 1, 2, 3 ]");
@@ -183,7 +183,7 @@ TEST_CASE("any sequence validation") {
 // any map
 TEST_CASE("any map validation") {
     const YAML::Node schema = YAML::Load("root: {}");
-    miroir::Validator<YAML::Node> validator{schema};
+    const miroir::Validator<YAML::Node> validator{schema};
 
     SUBCASE("map is valid") {
         const YAML::Node doc = YAML::Load("{ key: value }");
@@ -242,7 +242,7 @@ TEST_CASE("custom type validation") {
     root: custom_type
     )");
 
-    miroir::Validator<YAML::Node> validator{schema};
+    const miroir::Validator<YAML::Node> validator{schema};
 
     SUBCASE("scalar value is valid") {
         const YAML::Node doc = YAML::Load("42.0");
@@ -275,7 +275,7 @@ TEST_CASE("sequence validation") {
         description: any
     )");
 
-    miroir::Validator<YAML::Node> validator{schema};
+    const miroir::Validator<YAML::Node> validator{schema};
 
     SUBCASE("sequence is valid") {
         const YAML::Node doc = YAML::Load(R"(
@@ -335,7 +335,7 @@ TEST_CASE("value variant validation") {
       - { key: key, value: value }
     )");
 
-    miroir::Validator<YAML::Node> validator{schema};
+    const miroir::Validator<YAML::Node> validator{schema};
 
     SUBCASE("value '42' is valid") {
         const YAML::Node doc = YAML::Load("42");
@@ -385,7 +385,7 @@ TEST_CASE("key value variant validation") {
       required: any
     )");
 
-    miroir::Validator<YAML::Node> validator{schema};
+    const miroir::Validator<YAML::Node> validator{schema};
 
     SUBCASE("map with key 'first' is valid") {
         const YAML::Node doc = YAML::Load("{ first: 42, required: 24 }");
@@ -417,7 +417,7 @@ TEST_CASE("type variant validation") {
       - { key: scalar, value: [scalar], optional: !optional scalar }
     )");
 
-    miroir::Validator<YAML::Node> validator{schema};
+    const miroir::Validator<YAML::Node> validator{schema};
 
     SUBCASE("scalar value is valid") {
         const YAML::Node doc = YAML::Load("42");
@@ -487,7 +487,7 @@ TEST_CASE("nested errors") {
       targets: [target]
     )");
 
-    miroir::Validator<YAML::Node> validator{schema};
+    const miroir::Validator<YAML::Node> validator{schema};
 
     const YAML::Node doc = YAML::Load(R"(
         targets:
@@ -527,7 +527,7 @@ TEST_CASE("required structure validation") {
     root: custom_type
     )");
 
-    miroir::Validator<YAML::Node> validator{schema};
+    const miroir::Validator<YAML::Node> validator{schema};
 
     SUBCASE("structure is valid") {
         const YAML::Node doc = YAML::Load(R"(
@@ -572,7 +572,7 @@ TEST_CASE("optional structure validation") {
     root: custom_type
     )");
 
-    miroir::Validator<YAML::Node> validator{schema};
+    const miroir::Validator<YAML::Node> validator{schema};
 
     SUBCASE("structure is valid") {
         const YAML::Node doc = YAML::Load(R"(
@@ -602,7 +602,7 @@ TEST_CASE("embedded structure validation") {
       _: !embed custom_type
     )");
 
-    miroir::Validator<YAML::Node> validator{schema};
+    const miroir::Validator<YAML::Node> validator{schema};
 
     SUBCASE("structure is valid") {
         const YAML::Node doc = YAML::Load(R"(
@@ -638,7 +638,7 @@ TEST_CASE("key type validation") {
       $boolean: any
     )");
 
-    miroir::Validator<YAML::Node> validator{schema};
+    const miroir::Validator<YAML::Node> validator{schema};
 
     SUBCASE("numeric and boolean keys are valid") {
         const YAML::Node doc = YAML::Load("{ 420: [ 1, 2, 3 ], 42.0: 123, true: 1 }");
@@ -677,7 +677,7 @@ TEST_CASE("embedded key type validation") {
       $boolean: any
     )");
 
-    miroir::Validator<YAML::Node> validator{schema};
+    const miroir::Validator<YAML::Node> validator{schema};
 
     SUBCASE("numeric and boolean keys are valid") {
         const YAML::Node doc = YAML::Load("{ 420: [ 1, 2, 3 ], 42.0: 123, true: 1 }");
@@ -717,7 +717,7 @@ TEST_CASE("schema settings with default_required = false") {
       description: any
     )");
 
-    miroir::Validator<YAML::Node> validator{schema};
+    const miroir::Validator<YAML::Node> validator{schema};
 
     SUBCASE("'description' node is optional by default") {
         const YAML::Node doc = YAML::Load("name: some name");
@@ -746,7 +746,7 @@ TEST_CASE("schema settings with custom tag names") {
         description: !my_optional any
     )");
 
-    miroir::Validator<YAML::Node> validator{schema};
+    const miroir::Validator<YAML::Node> validator{schema};
 
     SUBCASE("structure is valid") {
         const YAML::Node doc = YAML::Load("name: some name");
@@ -770,7 +770,7 @@ TEST_CASE("generic list validation") {
       scalar_list: list<scalar>
     )");
 
-    miroir::Validator<YAML::Node> validator{schema};
+    const miroir::Validator<YAML::Node> validator{schema};
 
     SUBCASE("list of booleans and list of scalars are valid") {
         const YAML::Node doc = YAML::Load(R"(
@@ -808,7 +808,7 @@ TEST_CASE("generic key validation") {
       $generic<boolean>: any
     )");
 
-    miroir::Validator<YAML::Node> validator{schema};
+    const miroir::Validator<YAML::Node> validator{schema};
 
     SUBCASE("boolean and string keys are valid") {
         const YAML::Node doc = YAML::Load("{ '42': value, true: value }");
@@ -832,7 +832,7 @@ TEST_CASE("multiple generic args validation") {
     root: [one_of<boolean;integer>]
     )");
 
-    miroir::Validator<YAML::Node> validator{schema};
+    const miroir::Validator<YAML::Node> validator{schema};
 
     SUBCASE("generic type accept boolean and integer values") {
         const YAML::Node doc = YAML::Load("[ true, 42, false, 12 ]");
@@ -860,7 +860,7 @@ TEST_CASE("nested generic args validation") {
     root: [one_of<boolean;one_of<integer;string>>]
     )");
 
-    miroir::Validator<YAML::Node> validator{schema};
+    const miroir::Validator<YAML::Node> validator{schema};
 
     SUBCASE("generic type accept boolean, integer and string values") {
         const YAML::Node doc = YAML::Load("[ true, 42, false, 12, some string ]");
@@ -881,7 +881,7 @@ TEST_CASE("passed generic args validation") {
     root: single_or_list<string>
     )");
 
-    miroir::Validator<YAML::Node> validator{schema};
+    const miroir::Validator<YAML::Node> validator{schema};
 
     SUBCASE("generic type accept list of strings") {
         const YAML::Node doc = YAML::Load("[ hello, world ]");
@@ -904,7 +904,7 @@ TEST_CASE("generic map validation") {
     root: map<integer;boolean>
     )");
 
-    miroir::Validator<YAML::Node> validator{schema};
+    const miroir::Validator<YAML::Node> validator{schema};
 
     SUBCASE("map of integer keys and boolean values is valid") {
         const YAML::Node doc = YAML::Load("{ 42: true, 24: false }");
@@ -932,7 +932,7 @@ TEST_CASE("'if' generic type validation") {
     root: if<integer>
     )");
 
-    miroir::Validator<YAML::Node> validator{schema};
+    const miroir::Validator<YAML::Node> validator{schema};
 
     SUBCASE("'if' is valid") {
         const YAML::Node doc = YAML::Load(R"(
