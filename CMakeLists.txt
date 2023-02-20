@@ -10,8 +10,9 @@ set(TARGET_PROPERTIES
 
 # library
 
-add_library(miroir INTERFACE include/miroir/miroir.hpp)
+add_library(miroir INTERFACE)
 add_library(miroir::miroir ALIAS miroir)
+target_sources(miroir INTERFACE include/miroir/miroir.hpp)
 target_include_directories(miroir INTERFACE include)
 set_target_properties(miroir PROPERTIES ${TARGET_PROPERTIES})
 
