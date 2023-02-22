@@ -19,7 +19,6 @@ static inline void validate(const std::string &schema_str, const std::string &do
 
 /// Built-in types
 
-// any type
 TEST_CASE("any type validation") {
     const YAML::Node schema = YAML::Load("root: any");
     const miroir::Validator<YAML::Node> validator{schema};
@@ -43,7 +42,6 @@ TEST_CASE("any type validation") {
     }
 }
 
-// scalar type
 TEST_CASE("scalar type validation") {
     const YAML::Node schema = YAML::Load("root: scalar");
     const miroir::Validator<YAML::Node> validator{schema};
@@ -69,7 +67,6 @@ TEST_CASE("scalar type validation") {
     }
 }
 
-// numeric type
 TEST_CASE("numeric type validation") {
     const YAML::Node schema = YAML::Load("root: numeric");
     const miroir::Validator<YAML::Node> validator{schema};
@@ -94,7 +91,6 @@ TEST_CASE("numeric type validation") {
     }
 }
 
-// integer type
 TEST_CASE("integer type validation") {
     const YAML::Node schema = YAML::Load("root: integer");
     const miroir::Validator<YAML::Node> validator{schema};
@@ -120,7 +116,6 @@ TEST_CASE("integer type validation") {
     }
 }
 
-// boolean type
 TEST_CASE("boolean type validation") {
     const YAML::Node schema = YAML::Load("root: [boolean]");
     const miroir::Validator<YAML::Node> validator{schema};
@@ -139,7 +134,6 @@ TEST_CASE("boolean type validation") {
     }
 }
 
-// string type
 TEST_CASE("string type validation") {
     const YAML::Node schema = YAML::Load("root: [string]");
     const miroir::Validator<YAML::Node> validator{schema};
@@ -161,7 +155,6 @@ TEST_CASE("string type validation") {
     }
 }
 
-// any sequence
 TEST_CASE("any sequence validation") {
     const YAML::Node schema = YAML::Load("root: []");
     const miroir::Validator<YAML::Node> validator{schema};
@@ -180,7 +173,6 @@ TEST_CASE("any sequence validation") {
     }
 }
 
-// any map
 TEST_CASE("any map validation") {
     const YAML::Node schema = YAML::Load("root: {}");
     const miroir::Validator<YAML::Node> validator{schema};
@@ -199,7 +191,6 @@ TEST_CASE("any map validation") {
     }
 }
 
-// type aliases
 TEST_CASE("type aliases validation") {
     SUBCASE("map type aliases") {
         validate("root: map", "{ key: value }");
@@ -234,7 +225,6 @@ TEST_CASE("type aliases validation") {
 
 /// Custom types
 
-// custom type
 TEST_CASE("custom type validation") {
     const YAML::Node schema = YAML::Load(R"(
     types:
@@ -267,7 +257,6 @@ TEST_CASE("custom type validation") {
 
 /// Sequence
 
-// sequence
 TEST_CASE("sequence validation") {
     const YAML::Node schema = YAML::Load(R"(
     root:
@@ -325,7 +314,6 @@ TEST_CASE("sequence validation") {
 
 /// Variants
 
-// value variant
 TEST_CASE("value variant validation") {
     const YAML::Node schema = YAML::Load(R"(
     root: !variant
@@ -373,7 +361,6 @@ TEST_CASE("value variant validation") {
     }
 }
 
-// key value variant
 TEST_CASE("key value variant validation") {
     const YAML::Node schema = YAML::Load(R"(
     types:
@@ -408,7 +395,6 @@ TEST_CASE("key value variant validation") {
     }
 }
 
-// type variant
 TEST_CASE("type variant validation") {
     const YAML::Node schema = YAML::Load(R"(
     root:
@@ -476,7 +462,6 @@ TEST_CASE("type variant validation") {
     }
 }
 
-// nested errors
 TEST_CASE("nested errors") {
     const YAML::Node schema = YAML::Load(R"(
     types:
@@ -517,7 +502,6 @@ TEST_CASE("nested errors") {
 
 /// Structure
 
-// required structure
 TEST_CASE("required structure validation") {
     const YAML::Node schema = YAML::Load(R"(
     types:
@@ -562,7 +546,6 @@ TEST_CASE("required structure validation") {
     }
 }
 
-// optional structure
 TEST_CASE("optional structure validation") {
     const YAML::Node schema = YAML::Load(R"(
     types:
@@ -591,7 +574,6 @@ TEST_CASE("optional structure validation") {
     }
 }
 
-// embedded structure
 TEST_CASE("embedded structure validation") {
     const YAML::Node schema = YAML::Load(R"(
     types:
@@ -630,7 +612,6 @@ TEST_CASE("embedded structure validation") {
     }
 }
 
-// key type
 TEST_CASE("key type validation") {
     const YAML::Node schema = YAML::Load(R"(
     root:
@@ -664,7 +645,6 @@ TEST_CASE("key type validation") {
     }
 }
 
-// embedded key type
 TEST_CASE("embedded key type validation") {
     const YAML::Node schema = YAML::Load(R"(
     types:
@@ -707,7 +687,6 @@ TEST_CASE("embedded key type validation") {
 
 /// Schema settings
 
-// schema settings with default_required = false
 TEST_CASE("schema settings with default_required = false") {
     const YAML::Node schema = YAML::Load(R"(
     settings:
@@ -733,7 +712,6 @@ TEST_CASE("schema settings with default_required = false") {
     }
 }
 
-// schema settings with custom tags
 TEST_CASE("schema settings with custom tag names") {
     const YAML::Node schema = YAML::Load(R"(
     settings:
@@ -757,7 +735,6 @@ TEST_CASE("schema settings with custom tag names") {
 
 /// Attributes
 
-// ignore attributes = false (default)
 TEST_CASE("ignore attributes = false (default)") {
     const YAML::Node schema = YAML::Load("root: { key: string }");
     const miroir::Validator<YAML::Node> validator{schema};
@@ -777,7 +754,6 @@ TEST_CASE("ignore attributes = false (default)") {
     }
 }
 
-// ignore attributes = true
 TEST_CASE("ignore attributes = true") {
     const YAML::Node schema = YAML::Load(R"(
     settings:
@@ -809,7 +785,6 @@ TEST_CASE("ignore attributes = true") {
 
 /// Generic types
 
-// generic list
 TEST_CASE("generic list validation") {
     const YAML::Node schema = YAML::Load(R"(
     types:
@@ -850,7 +825,6 @@ TEST_CASE("generic list validation") {
     }
 }
 
-// generic key
 TEST_CASE("generic key validation") {
     const YAML::Node schema = YAML::Load(R"(
     types:
@@ -876,7 +850,6 @@ TEST_CASE("generic key validation") {
     }
 }
 
-// multiple generic args
 TEST_CASE("multiple generic args validation") {
     const YAML::Node schema = YAML::Load(R"(
     types:
@@ -904,7 +877,6 @@ TEST_CASE("multiple generic args validation") {
     }
 }
 
-// nested generic args
 TEST_CASE("nested generic args validation") {
     const YAML::Node schema = YAML::Load(R"(
     types:
@@ -921,7 +893,6 @@ TEST_CASE("nested generic args validation") {
     }
 }
 
-// passed generic args
 TEST_CASE("passed generic args validation") {
     const YAML::Node schema = YAML::Load(R"(
     types:
@@ -948,7 +919,6 @@ TEST_CASE("passed generic args validation") {
     }
 }
 
-// generic map
 TEST_CASE("generic map validation") {
     const YAML::Node schema = YAML::Load(R"(
     types:
@@ -972,7 +942,6 @@ TEST_CASE("generic map validation") {
     }
 }
 
-// custom 'if' generic type
 TEST_CASE("'if' generic type validation") {
     const YAML::Node schema = YAML::Load(R"(
     types:
