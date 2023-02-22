@@ -755,6 +755,58 @@ TEST_CASE("schema settings with custom tag names") {
     }
 }
 
+/// Attributes
+
+// ignore attributes = false (default)
+TEST_CASE("ignore attributes = false (default)") {
+    const YAML::Node schema = YAML::Load("root: { key: string }");
+    const miroir::Validator<YAML::Node> validator{schema};
+
+    SUBCASE("key without attributes is valid") {
+        const YAML::Node doc = YAML::Load("key: some string");
+        const std::vector<miroir::Error<YAML::Node>> errors = validator.validate(doc);
+        CHECK(errors.empty());
+    }
+
+    SUBCASE("key with attribute is invalid") {
+        const YAML::Node doc = YAML::Load("key:ATTR: some string");
+        const std::vector<miroir::Error<YAML::Node>> errors = validator.validate(doc);
+        CHECK(errors.size() == 2);
+        CHECK(errors[0].description() == "/key: node not found");
+        CHECK(errors[1].description() == "/key:ATTR: undefined node");
+    }
+}
+
+// ignore attributes = true
+TEST_CASE("ignore attributes = true") {
+    const YAML::Node schema = YAML::Load(R"(
+    settings:
+      ignore_attributes: true
+    root:
+      key: string
+    )");
+
+    const miroir::Validator<YAML::Node> validator{schema};
+
+    SUBCASE("key without attributes is valid") {
+        const YAML::Node doc = YAML::Load("key: some string");
+        const std::vector<miroir::Error<YAML::Node>> errors = validator.validate(doc);
+        CHECK(errors.empty());
+    }
+
+    SUBCASE("key with one attribute is valid") {
+        const YAML::Node doc = YAML::Load("key:ATTR: some string");
+        const std::vector<miroir::Error<YAML::Node>> errors = validator.validate(doc);
+        CHECK(errors.empty());
+    }
+
+    SUBCASE("key with few attributes is valid") {
+        const YAML::Node doc = YAML::Load("key:ATTR:ATTR: some string");
+        const std::vector<miroir::Error<YAML::Node>> errors = validator.validate(doc);
+        CHECK(errors.empty());
+    }
+}
+
 /// Generic types
 
 // generic list
@@ -975,3 +1027,4 @@ TEST_CASE("'if' generic type validation") {
 }
 
 // todo: test custom generic brackets and separator
+// todo: test custom attribute separator

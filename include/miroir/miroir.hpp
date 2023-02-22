@@ -97,6 +97,8 @@ template <typename Node> class Validator {
         std::string key_type_prefix;
         std::string generic_brackets;
         std::string generic_separator;
+        std::string attribute_separator;
+        bool ignore_attributes;
     };
 
     struct GenericType {
@@ -155,6 +157,8 @@ template <typename Node> class Validator {
     auto tag_is_variant(const std::string &tag) const -> bool;
 
     auto node_is_required_by_tag(const std::string &tag) const -> bool;
+
+    auto find_node(const Node &map, const std::string &key) const -> Node;
 
     auto type_is_generic(const std::string &type) const -> bool;
     auto parse_generic_type(const std::string &type) const -> GenericType;
@@ -220,6 +224,16 @@ namespace impl {
 
 auto string_is_prefixed(const std::string &str, const std::string &prefix) -> bool {
     return str.compare(0, prefix.size(), prefix) == 0;
+}
+
+auto string_trim_after(const std::string &str, char c) -> std::string {
+    const std::string::size_type pos = str.find(c);
+
+    if (pos != std::string::npos) {
+        return str.substr(0, pos);
+    } else {
+        return str;
+    }
 }
 
 // hacky way to replace generic args to the actual types in the error description
@@ -583,6 +597,8 @@ auto Validator<Node>::schema_settings(const Node &schema) -> SchemaSettings {
     settings.key_type_prefix = "$";
     settings.generic_brackets = "<>";
     settings.generic_separator = ";";
+    settings.attribute_separator = ":";
+    settings.ignore_attributes = false;
 
     const Node settings_node = NodeAccessor::at(schema, "settings");
 
@@ -603,6 +619,10 @@ auto Validator<Node>::schema_settings(const Node &schema) -> SchemaSettings {
             NodeAccessor::at(settings_node, "generic_brackets"), settings.generic_brackets);
         settings.generic_separator = NodeAccessor::as(
             NodeAccessor::at(settings_node, "generic_separator"), settings.generic_separator);
+        settings.attribute_separator = NodeAccessor::as(
+            NodeAccessor::at(settings_node, "attribute_separator"), settings.attribute_separator);
+        settings.ignore_attributes = NodeAccessor::as(
+            NodeAccessor::at(settings_node, "ignore_attributes"), settings.ignore_attributes);
     }
 
     MIROIR_ASSERT(!settings.optional_tag.empty(), "optional tag name must not be empty");
@@ -615,6 +635,9 @@ auto Validator<Node>::schema_settings(const Node &schema) -> SchemaSettings {
                   "generic brackets string must be 2 chars long");
     MIROIR_ASSERT(settings.generic_separator.size() == 1,
                   "generic separator string must be 1 char long");
+
+    MIROIR_ASSERT(settings.attribute_separator.size() == 1,
+                  "attribute separator string must be 1 char long");
 
     return settings;
 }
@@ -838,7 +861,7 @@ void Validator<Node>::validate_map(const Node &doc, const Node &schema, const Co
 
             if (!impl::string_is_prefixed(key, m_settings.key_type_prefix)) {
                 const bool node_is_required = node_is_required_by_tag(schema_val_tag);
-                const Node child_doc_node = NodeAccessor::at(doc, key);
+                const Node child_doc_node = find_node(doc, key);
                 const Context child_ctx = ctx.appending_path(key);
 
                 if (NodeAccessor::is_defined(child_doc_node)) {
@@ -927,6 +950,31 @@ template <typename Node>
 auto Validator<Node>::node_is_required_by_tag(const std::string &tag) const -> bool {
     return (m_settings.default_required && !tag_is_optional(tag)) ||
            (!m_settings.default_required && tag == m_settings.required_tag);
+}
+
+template <typename Node>
+auto Validator<Node>::find_node(const Node &map, const std::string &key) const -> Node {
+    MIROIR_ASSERT(NodeAccessor::is_map(map), "node must be a map");
+
+    const Node node = NodeAccessor::at(map, key);
+
+    if (node.IsDefined()) {
+        return node;
+    }
+
+    if (m_settings.ignore_attributes) {
+        for (auto it = NodeAccessor::begin(map); it != NodeAccessor::end(map); ++it) {
+            const Node key_node = it->first;
+            const Node val_node = it->second;
+            const std::string node_key = NodeAccessor::template as<std::string>(key_node);
+
+            if (impl::string_trim_after(node_key, ':') == key) {
+                return val_node;
+            }
+        }
+    }
+
+    return node;
 }
 
 template <typename Node>
