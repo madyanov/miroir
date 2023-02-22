@@ -155,8 +155,7 @@ template <typename Node> class Validator {
     auto tag_is_optional(const std::string &tag) const -> bool;
     auto tag_is_embed(const std::string &tag) const -> bool;
     auto tag_is_variant(const std::string &tag) const -> bool;
-
-    auto node_is_required_by_tag(const std::string &tag) const -> bool;
+    auto tag_is_required(const std::string &tag) const -> bool;
 
     auto find_node(const Node &map, const std::string &key) const -> Node;
 
@@ -860,7 +859,7 @@ void Validator<Node>::validate_map(const Node &doc, const Node &schema, const Co
             const std::string key = NodeAccessor::template as<std::string>(schema_key_node);
 
             if (!impl::string_is_prefixed(key, m_settings.key_type_prefix)) {
-                const bool node_is_required = node_is_required_by_tag(schema_val_tag);
+                const bool node_is_required = tag_is_required(schema_val_tag);
                 const Node child_doc_node = find_node(doc, key);
                 const Context child_ctx = ctx.appending_path(key);
 
@@ -882,7 +881,7 @@ void Validator<Node>::validate_map(const Node &doc, const Node &schema, const Co
     // validate key types
     for (const auto &[key_type, schema_val_node] : key_types) {
         const std::string schema_val_tag = NodeAccessor::tag(schema_val_node);
-        bool key_type_is_valid = !node_is_required_by_tag(schema_val_tag);
+        bool key_type_is_valid = !tag_is_required(schema_val_tag);
 
         for (auto it = NodeAccessor::begin(doc); it != NodeAccessor::end(doc); ++it) {
             const Node child_doc_val_node = it->second;
@@ -947,7 +946,7 @@ auto Validator<Node>::tag_is_variant(const std::string &tag) const -> bool {
 }
 
 template <typename Node>
-auto Validator<Node>::node_is_required_by_tag(const std::string &tag) const -> bool {
+auto Validator<Node>::tag_is_required(const std::string &tag) const -> bool {
     return (m_settings.default_required && !tag_is_optional(tag)) ||
            (!m_settings.default_required && tag == m_settings.required_tag);
 }
