@@ -65,7 +65,6 @@ template <typename Node> struct Error {
     ErrorType type;
     std::string path;                                         // path of the node in the document
     std::variant<std::monostate, std::string, Node> expected; // expected type
-    std::map<std::string, std::string> where;                 // generic args
 
     // errors that occurred during the validation of type variants
     std::vector<std::vector<Error<Node>>> variant_errors;
@@ -610,7 +609,7 @@ auto Validator<Node>::make_error(ErrorType type, const Context &ctx,
                                  const std::vector<std::vector<Error>> &variant_errors) const
     -> Error {
 
-    return Error{type, ctx.path, ctx.expected, ctx.where, variant_errors};
+    return Error{type, ctx.path, ctx.expected, variant_errors};
 }
 
 template <typename Node>
