@@ -220,6 +220,8 @@ namespace impl {
 #endif
 }
 
+/// Strings
+
 auto string_is_prefixed(const std::string &str, const std::string &prefix) -> bool {
     return str.compare(0, prefix.size(), prefix) == 0;
 }
@@ -247,6 +249,8 @@ auto string_indent(const std::string &str) -> std::string {
     return result;
 }
 
+/// Nodes
+
 template <typename Node>
 auto nodes_contains_node(const std::vector<Node> &nodes, const Node &target) -> bool {
     for (const Node &node : nodes) {
@@ -257,6 +261,8 @@ auto nodes_contains_node(const std::vector<Node> &nodes, const Node &target) -> 
 
     return false;
 }
+
+/// Errors
 
 template <typename Node>
 auto dump_expected(const std::variant<std::monostate, std::string, Node> &expected) -> std::string {
