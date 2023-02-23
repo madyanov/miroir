@@ -235,55 +235,6 @@ auto string_trim_after(const std::string &str, char c) -> std::string {
     }
 }
 
-// hacky way to replace generic args to the actual types in the error description
-// todo: not used for now, dead code should be deleted
-// cppcheck-suppress unusedFunction
-auto string_replace_words(const std::string &str, const std::map<std::string, std::string> &words)
-    -> std::string {
-
-    if (str.empty() || words.empty()) {
-        return str;
-    }
-
-    enum {
-        ST_NONE,
-        ST_WORD,
-    } state = ST_NONE;
-
-    std::string word;
-
-    std::string result;
-    result.reserve(str.size());
-
-    for (const char c : str + '\0') { // + '\0' hack to do last iteration
-        if (std::isalnum(c)) {
-            state = ST_WORD;
-        } else if (state == ST_WORD) {
-            const auto word_it = words.find(word);
-            if (word_it == words.end()) {
-                result += word;
-            } else {
-                result += word_it->second;
-            }
-
-            state = ST_NONE;
-        } else {
-            state = ST_NONE;
-        }
-
-        if (state == ST_WORD) {
-            word += c;
-        } else if (state == ST_NONE && c != '\0') {
-            result += c;
-            word.clear();
-        }
-    }
-
-    MIROIR_ASSERT(state == ST_NONE, "invalid string replacer state");
-
-    return result;
-}
-
 auto string_indent(const std::string &str) -> std::string {
     std::istringstream iss{str};
     std::string line;
