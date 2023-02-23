@@ -40,7 +40,7 @@ template <typename Node> struct NodeAccessor {
     // returns string representations of the node
     static auto dump(const Node &node) -> std::string;
 
-    // returns true if nodes have the same content
+    // returns true if both nodes have the same content
     static auto equals(const Node &lhs, const Node &rhs) -> bool;
     // returns true if both nodes point to the same memory
     static auto is_same(const Node &lhs, const Node &rhs) -> bool;
