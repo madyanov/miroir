@@ -917,7 +917,7 @@ auto Validator<Node>::find_node(const Node &map, const std::string &key) const -
             const Node val_node = it->second;
             const std::string node_key = NodeAccessor::template as<std::string>(key_node);
 
-            if (impl::string_trim_after(node_key, ':') == key) {
+            if (impl::string_trim_after(node_key, m_settings.attribute_separator[0]) == key) {
                 return val_node;
             }
         }
