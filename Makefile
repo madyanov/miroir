@@ -8,10 +8,20 @@ SOURCES = git ls-files -- "*.?pp"
 all: ci
 
 .PHONY: configure
-configure: format ## Configure
+configure: format ## Configure with default compiler
 	cmake -S . -B "$(BUILD_DIR)" -G "$(GENERATOR)" \
 		-D CMAKE_BUILD_TYPE="$(BUILD_TYPE)" \
 		-D CMAKE_EXPORT_COMPILE_COMMANDS=ON
+
+.PHONY: clang
+clang: export CC=clang
+clang: export CXX=clang++
+clang: configure ## Configure with Clang compiler
+
+.PHONY: gcc
+gcc: export CC=gcc
+gcc: export CXX=g++
+gcc: configure ## Configure with GCC compiler
 
 .PHONY: build
 build: configure ## Build test executable
@@ -30,9 +40,8 @@ clean: ## Remove $(BUILD_DIR) and coverage info
 # Format
 
 .PHONY: format
-format: ## Format source code using `clang-format`
+format: tags ## Format source code using `clang-format`
 	$(SOURCES) | xargs clang-format -i --style=file
-	$(MAKE) tags
 
 # Tags
 
@@ -50,19 +59,14 @@ tags: ## Generate tags file using `universal-ctags`
 # Local CI emulation
 
 .PHONY: ci
-ci: ## Run all CI stages locally (default)
-	$(MAKE) lint
-	$(MAKE) profile
+ci: lint profile ## Run all CI stages locally (default)
 	BUILD_TYPE=Debug $(MAKE) test
 	BUILD_TYPE=Release $(MAKE) test
 
 # Linting
 
 .PHONY: lint
-lint: ## Run all linters
-	$(MAKE) lint/check
-	$(MAKE) lint/tidy
-	$(MAKE) lint/spell
+lint: lint/check lint/tidy lint/spell ## Run all linters
 
 .PHONY: lint/check
 lint/check: configure ## Run `cppcheck`
@@ -96,29 +100,28 @@ lint/spell: configure ## Check spelling using `codespell`
 # Profilers
 
 .PHONY: profile
-profile: ## Run all profilers on test executable
-	$(MAKE) profile/address
-	$(MAKE) profile/undefined
+profile: profile/address profile/undefined ## Run all profilers on test executable
 
 .PHONY: profile/address
-profile/address: BUILD_TYPE = Asan
-profile/address: ASAN_OPTIONS = detect_leaks=1
+profile/address: BUILD_TYPE=Asan
+profile/address: ASAN_OPTIONS=detect_leaks=1
 profile/address: test ## Run address sanitizer on test executable
 
 .PHONY: profile/undefined
-profile/undefined: BUILD_TYPE = Ubsan
+profile/undefined: BUILD_TYPE=Ubsan
 profile/undefined: test ## Run undefined behavior sanitizer on test executable
 
 # Coverage
 
 .PHONY: coverage
+coverage: export BUILD_TYPE=Coverage
 coverage: ## Collect code coverage using `lcov`
 	lcov --zerocounters --directory .
-	BUILD_TYPE=Coverage $(MAKE) test
+	$(MAKE) test
 	lcov \
 		--directory . \
 		--capture \
-		--gcov-tool "${GCOV}" \
+		--gcov-tool "$(GCOV)" \
 		--output-file coverage.info
 	genhtml --demangle-cpp --output-directory coverage coverage.info
 	lcov --list coverage.info
