@@ -59,14 +59,19 @@ tags: ## Generate tags file using `universal-ctags`
 # Local CI emulation
 
 .PHONY: ci
-ci: lint profile ## Run all CI stages locally (default)
+ci: ## Run all CI stages locally (default)
+	$(MAKE) lint
+	$(MAKE) profile
 	BUILD_TYPE=Debug $(MAKE) test
 	BUILD_TYPE=Release $(MAKE) test
 
 # Linting
 
 .PHONY: lint
-lint: lint/check lint/tidy lint/spell ## Run all linters
+lint: ## Run all linters
+	$(MAKE) lint/check
+	$(MAKE) lint/tidy
+	$(MAKE) lint/spell
 
 .PHONY: lint/check
 lint/check: configure ## Run `cppcheck`
@@ -101,7 +106,9 @@ lint/spell: configure ## Check spelling using `codespell`
 # Profilers
 
 .PHONY: profile
-profile: profile/address profile/undefined ## Run all profilers on test executable
+profile: ## Run all profilers on test executable
+	$(MAKE) profile/address
+	$(MAKE) profile/undefined
 
 .PHONY: profile/address
 profile/address: BUILD_TYPE=Asan
