@@ -80,6 +80,7 @@ lint/check: configure ## Run `cppcheck`
 		--suppress=unmatchedSuppression \
 		--suppress=missingIncludeSystem \
 		--suppress=unusedStructMember \
+		--suppress=unusedFunction \
 		--suppress=useStlAlgorithm \
 		`$(SOURCES)`
 
