@@ -141,7 +141,7 @@ submodules/fetch: ## Fetch git submodules
 	git submodule update --init --recursive --progress
 
 .PHONY: submodules/update
-submodules/update: ## Update git submodules to the latest versions
+submodules/update: submodules/fetch ## Update git submodules to the latest versions
 	git submodule update --remote --merge
 
 # Tree
