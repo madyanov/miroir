@@ -177,7 +177,7 @@ TEST_CASE("any map validation") {
     const YAML::Node schema = YAML::Load("root: {}");
     const miroir::Validator<YAML::Node> validator{schema};
 
-    SUBCASE("map is valid") {
+    SUBCASE("map value is valid") {
         const YAML::Node doc = YAML::Load("{ key: value }");
         const std::vector<miroir::Error<YAML::Node>> errors = validator.validate(doc);
         CHECK(errors.empty());
@@ -266,7 +266,7 @@ TEST_CASE("sequence validation") {
 
     const miroir::Validator<YAML::Node> validator{schema};
 
-    SUBCASE("sequence is valid") {
+    SUBCASE("sequence value is valid") {
         const YAML::Node doc = YAML::Load(R"(
         - name: Some name 1
           description: Some description 1
@@ -411,7 +411,7 @@ TEST_CASE("type variant validation") {
         CHECK(errors.empty());
     }
 
-    SUBCASE("sequence of scalars is valid") {
+    SUBCASE("sequence of scalar values is valid") {
         const YAML::Node doc = YAML::Load("[ 1, 2, 3 ]");
         const std::vector<miroir::Error<YAML::Node>> errors = validator.validate(doc);
         CHECK(errors.empty());
@@ -799,7 +799,7 @@ TEST_CASE("generic list validation") {
 
     const miroir::Validator<YAML::Node> validator{schema};
 
-    SUBCASE("list of booleans and list of scalars are valid") {
+    SUBCASE("list of boolean values and list of scalar values are valid") {
         const YAML::Node doc = YAML::Load(R"(
         boolean_list: true
         scalar_list: [ 1, 2, some string ]
@@ -809,7 +809,7 @@ TEST_CASE("generic list validation") {
         CHECK(errors.empty());
     }
 
-    SUBCASE("boolean list with string values is invalid") {
+    SUBCASE("list of boolean values with string values is invalid") {
         const YAML::Node doc = YAML::Load(R"(
         boolean_list: some string
         scalar_list: []
@@ -906,13 +906,13 @@ TEST_CASE("passed generic args validation") {
 
     const miroir::Validator<YAML::Node> validator{schema};
 
-    SUBCASE("generic type accept list of strings") {
+    SUBCASE("generic type accept list of string values") {
         const YAML::Node doc = YAML::Load("[ hello, world ]");
         const std::vector<miroir::Error<YAML::Node>> errors = validator.validate(doc);
         CHECK(errors.empty());
     }
 
-    SUBCASE("generic type accept single string") {
+    SUBCASE("generic type accept single string value") {
         const YAML::Node doc = YAML::Load("hello");
         const std::vector<miroir::Error<YAML::Node>> errors = validator.validate(doc);
         CHECK(errors.empty());
