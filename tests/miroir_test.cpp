@@ -551,7 +551,7 @@ TEST_CASE("optional structure validation") {
     const YAML::Node schema = YAML::Load(R"(
     types:
       custom_type:
-        name: scalar
+        name: !optional scalar
         description: !optional any
     root: custom_type
     )");
@@ -572,6 +572,13 @@ TEST_CASE("optional structure validation") {
         const YAML::Node doc = YAML::Load("name: some name");
         const std::vector<miroir::Error<YAML::Node>> errors = validator.validate(doc);
         CHECK(errors.empty());
+    }
+
+    SUBCASE("value is not a map") {
+        const YAML::Node doc = YAML::Load("");
+        const std::vector<miroir::Error<YAML::Node>> errors = validator.validate(doc);
+        CHECK(errors.size() == 1);
+        CHECK(errors[0].description() == "/: expected value type: custom_type");
     }
 }
 
@@ -608,9 +615,10 @@ TEST_CASE("embedded structure validation") {
     SUBCASE("value is not a map") {
         const YAML::Node doc = YAML::Load("");
         const std::vector<miroir::Error<YAML::Node>> errors = validator.validate(doc);
-        CHECK(errors.size() == 2);
+        CHECK(errors.size() == 3);
         CHECK(errors[0].description() == "/name: node not found");
         CHECK(errors[1].description() == "/description: node not found");
+        CHECK(errors[2].description() == "/: expected value type: {_: !<!embed> custom_type}");
     }
 }
 

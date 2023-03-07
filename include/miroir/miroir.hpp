@@ -802,6 +802,7 @@ void Validator<Node>::validate_map(const Node &doc, const Node &schema, const Co
     std::vector<std::pair<std::string, Node>> key_types; // key type, schema val node
 
     std::size_t embed_count = 0;
+    bool has_required_nodes = false;
 
     // validate document structure
     for (auto it = NodeAccessor::begin(schema); it != NodeAccessor::end(schema); ++it) {
@@ -820,6 +821,8 @@ void Validator<Node>::validate_map(const Node &doc, const Node &schema, const Co
                 const std::optional<Node> child_doc_node = find_node(doc, key);
                 const Context child_ctx = ctx.appending_path(key);
 
+                has_required_nodes = has_required_nodes || node_is_required;
+
                 if (child_doc_node.has_value()) {
                     validate(child_doc_node.value(), schema_val_node, child_ctx, errors);
                     validated_nodes.push_back(child_doc_node.value());
@@ -836,7 +839,7 @@ void Validator<Node>::validate_map(const Node &doc, const Node &schema, const Co
     }
 
     if (!doc_is_map) {
-        if (!key_types.empty()) {
+        if (!has_required_nodes || !key_types.empty()) {
             // document node must be a map
             const Error err = make_error(ErrorType::InvalidValueType, ctx);
             errors.push_back(err);
