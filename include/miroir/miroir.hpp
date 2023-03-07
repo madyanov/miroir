@@ -156,7 +156,7 @@ template <typename Node> class Validator {
     auto tag_is_variant(const std::string &tag) const -> bool;
     auto tag_is_required(const std::string &tag) const -> bool;
 
-    auto find_node(const Node &map, const std::string &key) const -> Node;
+    auto find_node(const Node &map, const std::string &key) const -> std::optional<Node>;
 
     auto type_is_generic(const std::string &type) const -> bool;
     auto parse_generic_type(const std::string &type) const -> GenericType;
@@ -785,14 +785,15 @@ template <typename Node>
 void Validator<Node>::validate_map(const Node &doc, const Node &schema, const Context &ctx,
                                    std::vector<Error> &errors) const {
 
-    if (!NodeAccessor::is_map(doc)) {
-        // document node must be a map
-        const Error err = make_error(ErrorType::InvalidValueType, ctx);
-        errors.push_back(err);
-        return;
-    }
+    const bool doc_is_map = NodeAccessor::is_map(doc);
 
     if (NodeAccessor::size(schema) == 0) {
+        if (!doc_is_map) {
+            // document node must be a map
+            const Error err = make_error(ErrorType::InvalidValueType, ctx);
+            errors.push_back(err);
+        }
+
         // allow any map on empty map in the schema
         return;
     }
@@ -816,12 +817,12 @@ void Validator<Node>::validate_map(const Node &doc, const Node &schema, const Co
 
             if (!impl::string_is_prefixed(key, m_settings.key_type_prefix)) {
                 const bool node_is_required = tag_is_required(schema_val_tag);
-                const Node child_doc_node = find_node(doc, key);
+                const std::optional<Node> child_doc_node = find_node(doc, key);
                 const Context child_ctx = ctx.appending_path(key);
 
-                if (NodeAccessor::is_defined(child_doc_node)) {
-                    validate(child_doc_node, schema_val_node, child_ctx, errors);
-                    validated_nodes.push_back(child_doc_node);
+                if (child_doc_node.has_value()) {
+                    validate(child_doc_node.value(), schema_val_node, child_ctx, errors);
+                    validated_nodes.push_back(child_doc_node.value());
                 } else if (node_is_required) {
                     // required node not found
                     const Error err = make_error(ErrorType::NodeNotFound, child_ctx);
@@ -832,6 +833,16 @@ void Validator<Node>::validate_map(const Node &doc, const Node &schema, const Co
                 key_types.emplace_back(key_type, schema_val_node);
             }
         }
+    }
+
+    if (!doc_is_map) {
+        if (!key_types.empty()) {
+            // document node must be a map
+            const Error err = make_error(ErrorType::InvalidValueType, ctx);
+            errors.push_back(err);
+        }
+
+        return;
     }
 
     // validate key types
@@ -908,12 +919,16 @@ auto Validator<Node>::tag_is_required(const std::string &tag) const -> bool {
 }
 
 template <typename Node>
-auto Validator<Node>::find_node(const Node &map, const std::string &key) const -> Node {
-    MIROIR_ASSERT(NodeAccessor::is_map(map), "node must be a map");
+auto Validator<Node>::find_node(const Node &map, const std::string &key) const
+    -> std::optional<Node> {
+
+    if (!NodeAccessor::is_map(map)) {
+        return std::nullopt;
+    }
 
     const Node node = NodeAccessor::at(map, key);
 
-    if (node.IsDefined()) {
+    if (NodeAccessor::is_defined(node)) {
         return node;
     }
 
@@ -924,12 +939,12 @@ auto Validator<Node>::find_node(const Node &map, const std::string &key) const -
             const std::string node_key = NodeAccessor::template as<std::string>(key_node);
 
             if (impl::string_trim_after(node_key, m_settings.attribute_separator[0]) == key) {
-                return val_node;
+                return std::optional<Node>{val_node};
             }
         }
     }
 
-    return node;
+    return std::nullopt;
 }
 
 template <typename Node>
