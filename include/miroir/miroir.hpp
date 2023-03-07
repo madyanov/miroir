@@ -810,8 +810,10 @@ void Validator<Node>::validate_map(const Node &doc, const Node &schema, const Co
         const std::string schema_val_tag = NodeAccessor::tag(schema_val_node);
 
         if (tag_is_embed(schema_val_tag)) {
-            validate(doc, schema_val_node, ctx.with_embed(), errors);
-            ++embed_count;
+            if (doc_is_map) {
+                validate(doc, schema_val_node, ctx.with_embed(), errors);
+                ++embed_count;
+            }
         } else {
             const Node schema_key_node = it->first;
             const std::string key = NodeAccessor::template as<std::string>(schema_key_node);

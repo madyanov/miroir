@@ -615,10 +615,28 @@ TEST_CASE("embedded structure validation") {
     SUBCASE("value is not a map") {
         const YAML::Node doc = YAML::Load("");
         const std::vector<miroir::Error<YAML::Node>> errors = validator.validate(doc);
-        CHECK(errors.size() == 3);
-        CHECK(errors[0].description() == "/name: node not found");
-        CHECK(errors[1].description() == "/description: node not found");
-        CHECK(errors[2].description() == "/: expected value type: {_: !<!embed> custom_type}");
+        CHECK(errors.size() == 1);
+        CHECK(errors[0].description() == "/: expected value type: {_: !<!embed> custom_type}");
+    }
+}
+
+TEST_CASE("optional embedded structure validation") {
+    const YAML::Node schema = YAML::Load(R"(
+    types:
+      custom_type:
+        name: !optional scalar
+        description: !optional any
+    root:
+      _: !embed custom_type
+    )");
+
+    const miroir::Validator<YAML::Node> validator{schema};
+
+    SUBCASE("value is not a map") {
+        const YAML::Node doc = YAML::Load("");
+        const std::vector<miroir::Error<YAML::Node>> errors = validator.validate(doc);
+        CHECK(errors.size() == 1);
+        CHECK(errors[0].description() == "/: expected value type: {_: !<!embed> custom_type}");
     }
 }
 
@@ -689,7 +707,7 @@ TEST_CASE("embedded key type validation") {
     SUBCASE("scalar value is invalid") {
         const YAML::Node doc = YAML::Load("some string");
         const std::vector<miroir::Error<YAML::Node>> errors = validator.validate(doc);
-        CHECK(errors.size() == 3);
+        CHECK(errors.size() == 1);
         CHECK(errors[0].description() == "/: expected value type: {_1: !<!embed> {$numeric: any}, "
                                          "_2: !<!embed> embedded, $boolean: any}");
     }
