@@ -1,5 +1,5 @@
-#ifndef MIROIR_MIROIR_H
-#define MIROIR_MIROIR_H
+#ifndef MIROIR_MIROIR_HPP
+#define MIROIR_MIROIR_HPP
 
 #include <map>
 #include <optional>
@@ -176,7 +176,7 @@ template <typename Node> class Validator {
 
 } // namespace miroir
 
-#endif // ifndef MIROIR_MIROIR_H
+#endif // ifndef MIROIR_MIROIR_HPP
 
 #ifdef MIROIR_IMPLEMENTATION
 
