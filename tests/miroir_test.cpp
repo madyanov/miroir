@@ -77,7 +77,7 @@ TEST_CASE("numeric type validation") {
         CHECK(errors.empty());
     }
 
-    SUBCASE("float valud is valid") {
+    SUBCASE("float value is valid") {
         const YAML::Node doc = YAML::Load("42.0");
         const std::vector<miroir::Error<YAML::Node>> errors = validator.validate(doc);
         CHECK(errors.empty());
