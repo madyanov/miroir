@@ -1,6 +1,7 @@
 #ifndef MIROIR_MIROIR_HPP
 #define MIROIR_MIROIR_HPP
 
+#include <cctype>
 #include <map>
 #include <optional>
 #include <string>
