@@ -979,7 +979,7 @@ auto Validator<Node>::parse_generic_type(const std::string &type) const -> Gener
     int level = 0;
     std::string arg;
 
-    for (const char c : type) {
+    for (const unsigned char c : type) {
         MIROIR_ASSERT(state != ST_END, "invalid generic parser intermediate state: " << type);
 
         if (std::isspace(c)) {
