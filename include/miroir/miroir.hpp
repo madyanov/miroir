@@ -185,6 +185,7 @@ template <typename Node> class Validator {
 #include <limits>
 #include <set>
 #include <sstream>
+#include <string_view>
 
 // MIROIR_ASSERT macro
 #ifndef MIROIR_ASSERT
@@ -227,20 +228,24 @@ auto string_is_prefixed(const std::string &str, const std::string &prefix) -> bo
     return str.compare(0, prefix.size(), prefix) == 0;
 }
 
-auto string_trim_after(const std::string &str, char c) -> std::string {
+auto string_trim_after(const std::string &str, char c) -> std::string_view {
     const std::string::size_type pos = str.find(c);
 
     if (pos != std::string::npos) {
-        return str.substr(0, pos);
+        return std::string_view{str}.substr(0, pos);
     } else {
-        return str;
+        return std::string_view{str};
     }
 }
 
 auto string_indent(const std::string &str) -> std::string {
     std::istringstream iss{str};
+
     std::string line;
+    line.reserve(str.size());
+
     std::string result;
+    line.reserve(str.size());
 
     while (std::getline(iss, line, '\n')) {
         // todo: (c++20) use std::format
@@ -325,7 +330,7 @@ void filter_undefined_node_errors(std::vector<Error<Node>> &errors, std::size_t 
                                     }
 
                                     const std::size_t count = std::count_if(
-                                        errors.begin(), errors.end(),
+                                        errors.cbegin(), errors.cend(),
                                         [&remove_err](const Error &count_err) -> bool {
                                             return count_err.type == remove_err.type &&
                                                    count_err.path == remove_err.path;
@@ -531,7 +536,7 @@ Validator<Node>::Validator(const Node &schema,
         {"str", impl::node_is_string},
     };
 
-    m_validators.insert(builtin_validators.begin(), builtin_validators.end());
+    m_validators.insert(builtin_validators.cbegin(), builtin_validators.cend());
 }
 
 template <typename Node>
@@ -977,10 +982,12 @@ auto Validator<Node>::parse_generic_type(const std::string &type) const -> Gener
     } state = ST_NAME;
 
     int level = 0;
-    std::string arg;
+    std::string_view arg;
 
-    for (const unsigned char c : type) {
+    for (auto it = type.cbegin(); it != type.cend(); ++it) {
         MIROIR_ASSERT(state != ST_END, "invalid generic parser intermediate state: " << type);
+
+        const unsigned char c = *it;
 
         if (std::isspace(c)) {
             continue;
@@ -1008,15 +1015,15 @@ auto Validator<Node>::parse_generic_type(const std::string &type) const -> Gener
             generic_type.name += c;
             break;
         case ST_ARGS:
-            arg += c;
+            arg = std::string_view{!arg.empty() ? arg.cbegin() : &(*it), arg.size() + 1};
             break;
         case ST_SEP:
             state = ST_ARGS;
             [[fallthrough]];
         case ST_END:
             MIROIR_ASSERT(!arg.empty(), "generic arg must not be empty: " << type);
-            generic_type.args.push_back(arg);
-            arg.clear();
+            generic_type.args.push_back(std::string{arg});
+            arg = std::string_view{};
             break;
         }
     }
