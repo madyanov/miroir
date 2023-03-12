@@ -1082,7 +1082,7 @@ template <> struct NodeAccessor<YAML::Node> {
     static auto is_defined(const Node &node) -> bool { return node.IsDefined(); }
 
     static auto is_explicit(const Node &node) -> bool {
-        // https://yaml.org/spec/1.2.2/#24-tags
+        // see: https://yaml.org/spec/1.2.2/#24-tags
         // Explicit typing is denoted with a tag using the exclamation point (“!”) symbol.
         return node.Tag() == "!";
     }
