@@ -21,7 +21,8 @@ set_target_properties(miroir PROPERTIES ${TARGET_PROPERTIES})
 if(PROJECT_IS_TOP_LEVEL)
     add_subdirectory(external)
 
-    add_executable(miroir_test tests/miroir_test.cpp)
+    add_executable(miroir_test)
+    target_sources(miroir_test PRIVATE tests/miroir_test.cpp)
 
     target_link_libraries(miroir_test
         PRIVATE doctest::doctest_with_main

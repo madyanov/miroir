@@ -79,7 +79,7 @@ template <typename Node> class Validator {
   public:
     using Error = miroir::Error<Node>;
     using NodeAccessor = miroir::NodeAccessor<Node>;
-    using TypeValidator = auto(*)(const Node &val) -> bool;
+    using TypeValidator = auto (*)(const Node &val) -> bool;
 
   public:
     explicit Validator(const Node &schema,
@@ -441,7 +441,7 @@ template <typename Node> auto node_is_string(const Node &node) -> bool {
 /// Error
 
 template <typename Node> auto Error<Node>::description(int max_depth) const -> std::string {
-    MIROIR_ASSERT(max_depth >= 0, "max_depth must be greater than or equal to 0");
+    MIROIR_ASSERT(max_depth >= 0, "max_depth is negative");
 
     if (max_depth == 0) {
         max_depth = std::numeric_limits<int>::max();
@@ -586,19 +586,18 @@ auto Validator<Node>::schema_settings(const Node &schema) -> SchemaSettings {
             NodeAccessor::at(settings_node, "ignore_attributes"), settings.ignore_attributes);
     }
 
-    MIROIR_ASSERT(!settings.optional_tag.empty(), "optional tag name must not be empty");
-    MIROIR_ASSERT(!settings.required_tag.empty(), "required tag name must not be empty");
-    MIROIR_ASSERT(!settings.embed_tag.empty(), "embed tag name must not be empty");
-    MIROIR_ASSERT(!settings.variant_tag.empty(), "variant tag name must not be empty");
-    MIROIR_ASSERT(!settings.key_type_prefix.empty(), "key type prefix must not be empty");
+    MIROIR_ASSERT(!settings.optional_tag.empty(), "optional tag name is empty");
+    MIROIR_ASSERT(!settings.required_tag.empty(), "required tag name is empty");
+    MIROIR_ASSERT(!settings.embed_tag.empty(), "embed tag name is empty");
+    MIROIR_ASSERT(!settings.variant_tag.empty(), "variant tag name is empty");
+    MIROIR_ASSERT(!settings.key_type_prefix.empty(), "key type prefix is empty");
 
-    MIROIR_ASSERT(settings.generic_brackets.size() == 2,
-                  "generic brackets string must be 2 chars long");
+    MIROIR_ASSERT(settings.generic_brackets.size() == 2, "invalid generic brackets string length");
     MIROIR_ASSERT(settings.generic_separator.size() == 1,
-                  "generic separator string must be 1 char long");
+                  "invalid generic separator string length");
 
     MIROIR_ASSERT(settings.attribute_separator.size() == 1,
-                  "attribute separator string must be 1 char long");
+                  "invalid attribute separator string length");
 
     return settings;
 }
@@ -610,7 +609,7 @@ auto Validator<Node>::schema_types(const Node &schema) -> std::map<std::string, 
 
 template <typename Node> auto Validator<Node>::schema_root(const Node &schema) -> Node {
     MIROIR_ASSERT(NodeAccessor::is_map(schema),
-                  "schema must be a map: " << NodeAccessor::dump(schema));
+                  "schema is not a map: " << NodeAccessor::dump(schema));
     const Node root = NodeAccessor::at(schema, "root");
     MIROIR_ASSERT(NodeAccessor::is_defined(root), "missing root node in the schema");
     return root;
@@ -1021,7 +1020,7 @@ auto Validator<Node>::parse_generic_type(const std::string &type) const -> Gener
             state = ST_ARGS;
             [[fallthrough]];
         case ST_END:
-            MIROIR_ASSERT(!arg.empty(), "generic arg must not be empty: " << type);
+            MIROIR_ASSERT(!arg.empty(), "generic arg is empty: " << type);
             generic_type.args.push_back(std::string{arg});
             arg = std::string_view{};
             break;
@@ -1030,8 +1029,8 @@ auto Validator<Node>::parse_generic_type(const std::string &type) const -> Gener
 
     MIROIR_ASSERT(level == 0, "generic brackets are disbalanced: " << type);
     MIROIR_ASSERT(state == ST_END, "invalid generic parser end state: " << type);
-    MIROIR_ASSERT(!generic_type.name.empty(), "generic name must not be empty: " << type);
-    MIROIR_ASSERT(!generic_type.args.empty(), "generic args must not be empty: " << type);
+    MIROIR_ASSERT(!generic_type.name.empty(), "generic name is empty: " << type);
+    MIROIR_ASSERT(!generic_type.args.empty(), "generic args are empty: " << type);
 
     m_generic_types_cache[type] = generic_type;
 
@@ -1044,8 +1043,8 @@ auto Validator<Node>::make_generic_args(const GenericType &keys, const GenericTy
                                         const std::map<std::string, std::string> &where) const
     -> std::map<std::string, std::string> {
 
-    MIROIR_ASSERT(!keys.args.empty(), "generic args must not be empty");
-    MIROIR_ASSERT(!vals.args.empty(), "generic args must not be empty");
+    MIROIR_ASSERT(!keys.args.empty(), "generic args are empty");
+    MIROIR_ASSERT(!vals.args.empty(), "generic args are empty");
     MIROIR_ASSERT(keys.args.size() == vals.args.size(), "generic args count mismatch");
 
     std::map<std::string, std::string> generic_args;
@@ -1093,7 +1092,7 @@ template <> struct NodeAccessor<YAML::Node> {
 
     template <typename Key> static auto at(const Node &node, const Key &key) -> Node {
         MIROIR_ASSERT(node.IsSequence() || node.IsMap(),
-                      "node must be a sequence or a map: " << dump(node));
+                      "node is not a sequence or a map: " << dump(node));
         return node[key];
     }
 
@@ -1122,19 +1121,19 @@ template <> struct NodeAccessor<YAML::Node> {
 
     static auto size(const Node &node) -> std::size_t {
         MIROIR_ASSERT(node.IsSequence() || node.IsMap(),
-                      "node must be a sequence or a map: " << dump(node));
+                      "node is not a sequence or a map: " << dump(node));
         return node.size();
     }
 
     static auto begin(const Node &node) -> Iterator {
         MIROIR_ASSERT(node.IsSequence() || node.IsMap(),
-                      "node must be a sequence or a map: " << dump(node));
+                      "node is not a sequence or a map: " << dump(node));
         return node.begin();
     }
 
     static auto end(const Node &node) -> Iterator {
         MIROIR_ASSERT(node.IsSequence() || node.IsMap(),
-                      "node must be a sequence or a map: " << dump(node));
+                      "node is not a sequence or a map: " << dump(node));
         return node.end();
     }
 };
