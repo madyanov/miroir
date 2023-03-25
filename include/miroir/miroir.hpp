@@ -592,12 +592,13 @@ auto Validator<Node>::schema_settings(const Node &schema) -> SchemaSettings {
     MIROIR_ASSERT(!settings.variant_tag.empty(), "variant tag name is empty");
     MIROIR_ASSERT(!settings.key_type_prefix.empty(), "key type prefix is empty");
 
-    MIROIR_ASSERT(settings.generic_brackets.size() == 2, "invalid generic brackets string length");
+    MIROIR_ASSERT(settings.generic_brackets.size() == 2,
+                  "invalid generic brackets string length: " << settings.generic_brackets);
     MIROIR_ASSERT(settings.generic_separator.size() == 1,
-                  "invalid generic separator string length");
+                  "invalid generic separator string length: " << settings.generic_separator);
 
     MIROIR_ASSERT(settings.attribute_separator.size() == 1,
-                  "invalid attribute separator string length");
+                  "invalid attribute separator string length: " << settings.attribute_separator);
 
     return settings;
 }
