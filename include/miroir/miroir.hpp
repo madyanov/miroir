@@ -1024,6 +1024,8 @@ auto Validator<Node>::parse_generic_type(const std::string &type) const -> Gener
             generic_type.args.push_back(std::string{arg});
             arg = std::string_view{};
             break;
+        default:
+            MIROIR_ASSERT(false, "invalid generic parser state: " << state);
         }
     }
 
