@@ -5,6 +5,7 @@
 #include <doctest/doctest.h>
 #include <yaml-cpp/yaml.h>
 
+#include <algorithm>
 #include <vector>
 
 /// Misc
@@ -226,6 +227,35 @@ TEST_CASE("type aliases validation") {
 /// Custom types
 
 TEST_CASE("custom type validation") {
+    const std::map<std::string, miroir::Validator<YAML::Node>::TypeValidator> type_validators{
+        {"name",
+         [](const YAML::Node &node) -> bool {
+             const std::string val = node.Scalar();
+             return node.IsScalar() && std::none_of(val.begin(), val.end(),
+                                                    [](char c) -> bool { return std::isspace(c); });
+         }},
+    };
+
+    const YAML::Node schema = YAML::Load("root: name");
+    const miroir::Validator<YAML::Node> validator{schema, type_validators};
+
+    SUBCASE("value without spaces is valid") {
+        const YAML::Node doc = YAML::Load("name");
+        const std::vector<miroir::Error<YAML::Node>> errors = validator.validate(doc);
+        CHECK(errors.empty());
+    }
+
+    SUBCASE("value with spaces is invalid") {
+        const YAML::Node doc = YAML::Load("some name");
+        const std::vector<miroir::Error<YAML::Node>> errors = validator.validate(doc);
+        CHECK(errors.size() == 1);
+        CHECK(errors[0].description() == "/: expected value type: name");
+    }
+}
+
+/// Custom schema types
+
+TEST_CASE("custom schema type validation") {
     const YAML::Node schema = YAML::Load(R"(
     types:
       custom_type: scalar
