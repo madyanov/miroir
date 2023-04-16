@@ -79,7 +79,7 @@ template <typename Node> class Validator {
   public:
     using Error = miroir::Error<Node>;
     using NodeAccessor = miroir::NodeAccessor<Node>;
-    using TypeValidator = auto (*)(const Node &val) -> bool;
+    using TypeValidator = auto(*)(const Node &val) -> bool;
 
   public:
     explicit Validator(const Node &schema,

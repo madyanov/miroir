@@ -228,7 +228,7 @@ TEST_CASE("type aliases validation") {
 
 TEST_CASE("custom type validation") {
     const std::map<std::string, miroir::Validator<YAML::Node>::TypeValidator> type_validators{
-        {"name",
+        {"scalar_without_spaces",
          [](const YAML::Node &node) -> bool {
              const std::string val = node.Scalar();
              return node.IsScalar() && std::none_of(val.begin(), val.end(),
@@ -236,20 +236,20 @@ TEST_CASE("custom type validation") {
          }},
     };
 
-    const YAML::Node schema = YAML::Load("root: name");
+    const YAML::Node schema = YAML::Load("root: scalar_without_spaces");
     const miroir::Validator<YAML::Node> validator{schema, type_validators};
 
-    SUBCASE("value without spaces is valid") {
-        const YAML::Node doc = YAML::Load("name");
+    SUBCASE("scalar without spaces is valid") {
+        const YAML::Node doc = YAML::Load("scalar");
         const std::vector<miroir::Error<YAML::Node>> errors = validator.validate(doc);
         CHECK(errors.empty());
     }
 
-    SUBCASE("value with spaces is invalid") {
-        const YAML::Node doc = YAML::Load("some name");
+    SUBCASE("scalar with spaces is invalid") {
+        const YAML::Node doc = YAML::Load("scalar with spaces");
         const std::vector<miroir::Error<YAML::Node>> errors = validator.validate(doc);
         CHECK(errors.size() == 1);
-        CHECK(errors[0].description() == "/: expected value type: name");
+        CHECK(errors[0].description() == "/: expected value type: scalar_without_spaces");
     }
 }
 
