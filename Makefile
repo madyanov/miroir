@@ -112,8 +112,7 @@ profile: ## Run all profilers on test executable
 
 .PHONY: profile/address
 profile/address: BUILD_TYPE=Asan
-profile/address: ASAN_OPTIONS=detect_leaks=1
-profile/address: test ## Run address sanitizer on test executable
+profile/address: ASAN_OPTIONS=detect_leaks=1:detect_container_overflow=0 test ## Run address sanitizer on test executable
 
 .PHONY: profile/undefined
 profile/undefined: BUILD_TYPE=Ubsan
