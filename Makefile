@@ -111,11 +111,12 @@ profile: ## Run all profilers on test executable
 	$(MAKE) profile/undefined
 
 .PHONY: profile/address
-profile/address: BUILD_TYPE=Asan
-profile/address: ASAN_OPTIONS=detect_leaks=1:detect_container_overflow=0 test ## Run address sanitizer on test executable
+profile/address: export BUILD_TYPE=Asan
+profile/address: export ASAN_OPTIONS=detect_container_overflow=0
+profile/address: test ## Run address sanitizer on test executable
 
 .PHONY: profile/undefined
-profile/undefined: BUILD_TYPE=Ubsan
+profile/undefined: export BUILD_TYPE=Ubsan
 profile/undefined: test ## Run undefined behavior sanitizer on test executable
 
 # Coverage
