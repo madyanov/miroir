@@ -195,8 +195,9 @@ template <typename Node> class Validator {
     do {                                                                                           \
         if (!(cond)) {                                                                             \
             /* todo: (c++20) use std::format */                                                    \
-            std::cerr << "Assertion ( " << #cond << " ) failed in " << __FILE__ << ":" << __LINE__ \
-                      << ": " << msg << std::endl;                                                 \
+            std::cerr << "FATAL " << __FILE__ << ":" << __LINE__ << ": assertion failure ( "       \
+                      << #cond << " )" << std::endl;                                               \
+            std::cerr << "FATAL " << msg << std::endl;                                             \
             std::abort();                                                                          \
         }                                                                                          \
     } while (false)
@@ -549,17 +550,18 @@ auto Validator<Node>::validate(const Node &doc) const -> std::vector<Error> {
 
 template <typename Node>
 auto Validator<Node>::schema_settings(const Node &schema) -> SchemaSettings {
-    SchemaSettings settings{};
-    settings.default_required = true;
-    settings.optional_tag = "optional";
-    settings.required_tag = "required";
-    settings.embed_tag = "embed";
-    settings.variant_tag = "variant";
-    settings.key_type_prefix = "$";
-    settings.generic_brackets = "<>";
-    settings.generic_separator = ";";
-    settings.attribute_separator = ":";
-    settings.ignore_attributes = false;
+    SchemaSettings settings{
+        .default_required = true,
+        .optional_tag = "optional",
+        .required_tag = "required",
+        .embed_tag = "embed",
+        .variant_tag = "variant",
+        .key_type_prefix = "$",
+        .generic_brackets = "<>",
+        .generic_separator = ";",
+        .attribute_separator = ":",
+        .ignore_attributes = false,
+    };
 
     const Node settings_node = NodeAccessor::at(schema, "settings");
 
@@ -621,7 +623,12 @@ auto Validator<Node>::make_error(ErrorType type, const Context &ctx,
                                  const std::vector<std::vector<Error>> &variant_errors) const
     -> Error {
 
-    return Error{type, ctx.path, ctx.expected, variant_errors};
+    return Error{
+        .type = type,
+        .path = ctx.path,
+        .expected = ctx.expected,
+        .variant_errors = variant_errors,
+    };
 }
 
 template <typename Node>
