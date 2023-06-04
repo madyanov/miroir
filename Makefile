@@ -1,69 +1,76 @@
-GENERATOR ?= Ninja
+DESTDIR =
+PREFIX ?= /usr/local
 BUILD_TYPE ?= Debug
-BUILD_DIR ?= build
-GCOV ?= gcov
+BUILD_DIR := build
 
-SOURCES = git ls-files -- "*.?pp"
+BIN_DIR = $(DESTDIR)$(PREFIX)/bin/
+MAKEFILE = $(BUILD_DIR)/Makefile
 
-all: ci
+GIT_SOURCES := git ls-files -- "*.?pp"
+SOURCES := $(shell $(GIT_SOURCES))
 
-.PHONY: configure
-configure: format ## Configure with default compiler
-	cmake -S . -B "$(BUILD_DIR)" -G "$(GENERATOR)" \
+CHECK_BUILD_TYPE = $(BUILD_DIR)/BUILD.$(shell echo $(BUILD_TYPE))
+CHECK_FORMAT = $(BUILD_DIR)/FORMAT
+
+.PHONY: test
+test: $(BUILD_DIR)/miroir_test ## Run test executable (default)
+	"./$(BUILD_DIR)/miroir_test"
+
+$(CHECK_BUILD_TYPE):
+	rm -f "$(BUILD_DIR)"/BUILD.*
+	mkdir -p "$(BUILD_DIR)"
+	touch "$@"
+
+$(MAKEFILE): CMakeLists.txt $(CHECK_BUILD_TYPE) $(CHECK_FORMAT)
+	cmake \
+		-S . \
+		-B "$(BUILD_DIR)" \
+		-G "Unix Makefiles" \
 		-D CMAKE_BUILD_TYPE="$(BUILD_TYPE)" \
 		-D CMAKE_EXPORT_COMPILE_COMMANDS=ON
+	touch "$@"
+
+$(BUILD_DIR)/miroir_test: $(MAKEFILE) $(SOURCES)
+	cmake \
+		--build "$(BUILD_DIR)" \
+		--config "$(BUILD_TYPE)" \
+		--target miroir_test \
+		--parallel
+	touch "$@"
+
+# Helpers
+
+.PHONY: clean
+clean: ## Remove $(BUILD_DIR)
+	rm -rf "$(BUILD_DIR)"
+
+# Compilers
 
 .PHONY: clang
 clang: export CC=clang
 clang: export CXX=clang++
-clang: configure ## Configure with Clang compiler
+clang: clean $(MAKEFILE) ## Configure with Clang compiler
 
 .PHONY: gcc
 gcc: export CC=gcc
 gcc: export CXX=g++
-gcc: configure ## Configure with GCC compiler
-
-.PHONY: build
-build: configure ## Build test executable
-	cmake --build "$(BUILD_DIR)" --config "$(BUILD_TYPE)" --parallel
-
-.PHONY: test
-test: build ## Run test executable
-	"./$(BUILD_DIR)/miroir_test"
-
-.PHONY: clean
-clean: ## Remove $(BUILD_DIR) and coverage info
-	rm -f coverage.info
-	rm -rf coverage
-	rm -rf "$(BUILD_DIR)"
+gcc: clean $(MAKEFILE) ## Configure with GCC compiler
 
 # Format
 
 .PHONY: format
-format: tags ## Format source code using `clang-format`
-	$(SOURCES) | xargs clang-format -i --style=file
+format: $(CHECK_FORMAT) ## Format source code using `clang-format`
 
-# Tags
-
-.PHONY: tags
-tags: ## Generate tags file using `universal-ctags`
-	ctags \
-		--recurse \
-		--exclude=.git \
-		--exclude=build \
-		--c++-kinds=+p \
-		--fields=+iaS \
-		--extras=+q \
-		--language-force=C++
-
-# Local CI emulation
+$(CHECK_FORMAT): $(SOURCES)
+	$(GIT_SOURCES) | xargs clang-format -i --style=file
+	touch "$@"
 
 .PHONY: ci
-ci: ## Run all CI stages locally (default)
+ci: ## Run all CI stages locally
 	$(MAKE) lint
 	$(MAKE) profile
-	BUILD_TYPE=Debug $(MAKE) test
-	BUILD_TYPE=Release $(MAKE) test
+	$(MAKE) BUILD_TYPE=Debug test
+	$(MAKE) BUILD_TYPE=Release test
 
 # Linting
 
@@ -74,7 +81,7 @@ lint: ## Run all linters
 	$(MAKE) lint/spell
 
 .PHONY: lint/check
-lint/check: configure ## Run `cppcheck`
+lint/check: $(MAKEFILE) ## Run `cppcheck`
 	cppcheck \
 		--cppcheck-build-dir="$(BUILD_DIR)" \
 		--error-exitcode=1 \
@@ -87,21 +94,20 @@ lint/check: configure ## Run `cppcheck`
 		--suppress=unusedStructMember \
 		--suppress=unusedFunction \
 		--suppress=useStlAlgorithm \
-		`$(SOURCES)`
+		`$(GIT_SOURCES)`
 
 .PHONY: lint/tidy
-lint/tidy: configure ## Run `clang-tidy`
+lint/tidy: $(MAKEFILE) ## Run `clang-tidy`
 	clang-tidy \
 		-p="$(BUILD_DIR)" \
 		--warnings-as-errors=* \
-		--header-filter=.* \
-		`$(SOURCES)`
+		`$(GIT_SOURCES)`
 
 .PHONY: lint/spell
-lint/spell: configure ## Check spelling using `codespell`
+lint/spell: ## Check spelling using `codespell`
 	codespell \
 		`git ls-files -- "*.md" "*.txt" "*.json" "*.yml" "Makefile"` \
-		`$(SOURCES)`
+		`$(GIT_SOURCES)`
 
 # Profilers
 
@@ -111,38 +117,12 @@ profile: ## Run all profilers on test executable
 	$(MAKE) profile/undefined
 
 .PHONY: profile/address
-profile/address: export BUILD_TYPE=Asan
-profile/address: export ASAN_OPTIONS=detect_container_overflow=0
-profile/address: test ## Run address sanitizer on test executable
+profile/address: ## Run address sanitizer on test executable
+	$(MAKE) BUILD_TYPE=Asan ASAN_OPTIONS=detect_container_overflow=0 test
 
 .PHONY: profile/undefined
-profile/undefined: export BUILD_TYPE=Ubsan
-profile/undefined: test ## Run undefined behavior sanitizer on test executable
-
-# Coverage
-
-.PHONY: coverage
-coverage: export BUILD_TYPE=Coverage
-coverage: ## Collect code coverage using `lcov`
-	lcov --zerocounters --directory .
-	$(MAKE) test
-	lcov \
-		--directory . \
-		--capture \
-		--gcov-tool "$(GCOV)" \
-		--output-file coverage.info
-	genhtml --demangle-cpp --output-directory coverage coverage.info
-	lcov --list coverage.info
-
-# Submodules
-
-.PHONY: submodules/fetch
-submodules/fetch: ## Fetch git submodules
-	git submodule update --init --recursive --progress
-
-.PHONY: submodules/update
-submodules/update: submodules/fetch ## Update git submodules to the latest versions
-	git submodule update --remote --merge
+profile/undefined: ## Run undefined behavior sanitizer on test executable
+	$(MAKE) BUILD_TYPE=Ubsan test
 
 # Tree
 
