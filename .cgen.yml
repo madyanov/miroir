@@ -1,0 +1,87 @@
+project: miroir
+
+templates:
+  common:
+    properties:
+      CXX_STANDARD: 20
+      CXX_STANDARD_REQUIRED: ON
+    compile_options:
+      global:
+        - -Wall
+        - -Wextra
+        - -Wpedantic
+      configurations:
+        Release:
+          - -Werror
+
+  asan:
+    compile_options:
+      configurations:
+        Asan:
+          - ${CMAKE_CXX_FLAGS_DEBUG}
+          - -O1
+          - -fno-omit-frame-pointer
+          - -fno-optimize-sibling-calls
+          - -fsanitize=address
+    link_options:
+      configurations:
+        Asan:
+          - ${CMAKE_EXE_LINKER_FLAGS_DEBUG}
+          - -g
+          - -fsanitize=address
+
+  ubsan:
+    compile_options:
+      configurations:
+        Ubsan:
+          - ${CMAKE_CXX_FLAGS_DEBUG}
+          - -O1
+          - -fno-omit-frame-pointer
+          - -fno-optimize-sibling-calls
+          - -fsanitize=undefined
+          - -fno-sanitize-recover
+    link_options:
+      configurations:
+        Ubsan:
+          - ${CMAKE_EXE_LINKER_FLAGS_DEBUG}
+          - -g
+          - -fsanitize=undefined
+
+packages:
+  - external: external/doctest
+    url: https://github.com/doctest/doctest
+    options:
+      DOCTEST_NO_INSTALL: ON
+
+  - external: external/yaml-cpp
+    url: https://github.com/jbeder/yaml-cpp
+    options:
+      YAML_BUILD_SHARED_LIBS: OFF
+      YAML_CPP_BUILD_CONTRIB: OFF
+      YAML_CPP_BUILD_TOOLS: OFF
+      YAML_CPP_FORMAT_SOURCE: OFF
+
+targets:
+  - library: miroir
+    type: interface
+    aliases:
+      - miroir::miroir
+    templates:
+      - common
+    includes:
+      - include
+    sources:
+      - include/miroir/miroir.hpp
+
+  - executable: miroir_test
+    if: PROJECT_IS_TOP_LEVEL
+    templates:
+      - common
+      - asan
+      - ubsan
+    sources:
+      - tests/miroir_test.cpp
+    dependencies:
+      - doctest::doctest_with_main
+      - yaml-cpp
+      - miroir::miroir
