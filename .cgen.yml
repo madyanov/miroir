@@ -49,11 +49,13 @@ templates:
 
 packages:
   - external: external/doctest
+    if: PROJECT_IS_TOP_LEVEL
     url: https://github.com/doctest/doctest
     options:
       DOCTEST_NO_INSTALL: ON
 
   - external: external/yaml-cpp
+    if: PROJECT_IS_TOP_LEVEL
     url: https://github.com/jbeder/yaml-cpp
     options:
       YAML_BUILD_SHARED_LIBS: OFF

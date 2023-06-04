@@ -17,7 +17,9 @@ function(cgen_package_0)
         message(WARNING "Package external/doctest doesn't have CMakeLists.txt")
     endif()
 endfunction()
-cgen_package_0()
+if(PROJECT_IS_TOP_LEVEL)
+    cgen_package_0()
+endif()
 
 # package external/yaml-cpp
 function(cgen_package_1)
@@ -31,7 +33,9 @@ function(cgen_package_1)
         message(WARNING "Package external/yaml-cpp doesn't have CMakeLists.txt")
     endif()
 endfunction()
-cgen_package_1()
+if(PROJECT_IS_TOP_LEVEL)
+    cgen_package_1()
+endif()
 
 #
 # Targets
