@@ -1,4 +1,4 @@
-BUILD_TYPE ?= Release
+BUILD_TYPE ?= Debug
 BUILD_DIR := build
 
 CMAKE_CACHE := $(BUILD_DIR)/CMakeCache.txt
