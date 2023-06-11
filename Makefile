@@ -131,6 +131,12 @@ sanitize/ubsan: ## Run undefined behavior sanitizer on test executable
 tree: ## Show project structure using `tree`
 	tree --gitignore -I external
 
+# Todo
+
+.PHONY: todo
+todo: ## Show TODOs
+	grep --color '\btodo\b' `$(GIT_SOURCES)`
+
 # Help
 
 help: ## Show this help
