@@ -1,27 +1,24 @@
-DESTDIR =
-PREFIX ?= /usr/local
-BUILD_TYPE ?= Debug
+BUILD_TYPE ?= Release
 BUILD_DIR := build
 
-BIN_DIR = $(DESTDIR)$(PREFIX)/bin/
-MAKEFILE = $(BUILD_DIR)/Makefile
+CMAKE_CACHE := $(BUILD_DIR)/CMakeCache.txt
 
 GIT_SOURCES := git ls-files -- "*.?pp"
 SOURCES := $(shell $(GIT_SOURCES))
 
-CHECK_BUILD_TYPE = $(BUILD_DIR)/BUILD.$(shell echo $(BUILD_TYPE))
-CHECK_FORMAT = $(BUILD_DIR)/FORMAT
+CHECK_BUILD_TYPE := $(BUILD_DIR)/BUILD.$(shell echo $(BUILD_TYPE))
+CHECK_FORMAT := $(BUILD_DIR)/FORMAT
 
-.PHONY: test
-test: $(BUILD_DIR)/miroir_test ## Run test executable (default)
-	"./$(BUILD_DIR)/miroir_test"
+.PHONY: default
+default: $(BUILD_DIR)/miroir_test ## Build test executable (default)
 
 $(CHECK_BUILD_TYPE):
-	rm -f "$(BUILD_DIR)"/BUILD.*
+	$(RM) "$(BUILD_DIR)"/BUILD.*
+	$(RM) "$(CMAKE_CACHE)"
 	mkdir -p "$(BUILD_DIR)"
 	touch "$@"
 
-$(MAKEFILE): CMakeLists.txt $(CHECK_BUILD_TYPE) $(CHECK_FORMAT)
+$(CMAKE_CACHE): CMakeLists.txt $(CHECK_BUILD_TYPE) $(CHECK_FORMAT)
 	cmake \
 		-S . \
 		-B "$(BUILD_DIR)" \
@@ -30,7 +27,7 @@ $(MAKEFILE): CMakeLists.txt $(CHECK_BUILD_TYPE) $(CHECK_FORMAT)
 		-D CMAKE_EXPORT_COMPILE_COMMANDS=ON
 	touch "$@"
 
-$(BUILD_DIR)/miroir_test: $(MAKEFILE) $(SOURCES)
+$(BUILD_DIR)/miroir_test: $(CMAKE_CACHE) $(SOURCES)
 	cmake \
 		--build "$(BUILD_DIR)" \
 		--config "$(BUILD_TYPE)" \
@@ -42,19 +39,23 @@ $(BUILD_DIR)/miroir_test: $(MAKEFILE) $(SOURCES)
 
 .PHONY: clean
 clean: ## Remove $(BUILD_DIR)
-	rm -rf "$(BUILD_DIR)"
+	$(RM) -r "$(BUILD_DIR)"
+
+.PHONY: test
+test: $(BUILD_DIR)/miroir_test ## Run test executable
+	"./$(BUILD_DIR)/miroir_test"
 
 # Compilers
 
 .PHONY: clang
 clang: export CC=clang
 clang: export CXX=clang++
-clang: clean $(MAKEFILE) ## Configure with Clang compiler
+clang: clean $(CMAKE_CACHE) ## Configure with Clang compiler
 
 .PHONY: gcc
 gcc: export CC=gcc
 gcc: export CXX=g++
-gcc: clean $(MAKEFILE) ## Configure with GCC compiler
+gcc: clean $(CMAKE_CACHE) ## Configure with GCC compiler
 
 # Format
 
@@ -68,7 +69,7 @@ $(CHECK_FORMAT): $(SOURCES)
 .PHONY: ci
 ci: ## Run all CI stages locally
 	$(MAKE) lint
-	$(MAKE) profile
+	$(MAKE) sanitize
 	$(MAKE) BUILD_TYPE=Debug test
 	$(MAKE) BUILD_TYPE=Release test
 
@@ -76,12 +77,12 @@ ci: ## Run all CI stages locally
 
 .PHONY: lint
 lint: ## Run all linters
-	$(MAKE) lint/check
-	$(MAKE) lint/tidy
-	$(MAKE) lint/spell
+	$(MAKE) lint/cppcheck
+	$(MAKE) lint/clang-tidy
+	$(MAKE) lint/codespell
 
-.PHONY: lint/check
-lint/check: $(MAKEFILE) ## Run `cppcheck`
+.PHONY: lint/cppcheck
+lint/cppcheck: $(CMAKE_CACHE) ## Run `cppcheck`
 	cppcheck \
 		--cppcheck-build-dir="$(BUILD_DIR)" \
 		--error-exitcode=1 \
@@ -96,32 +97,32 @@ lint/check: $(MAKEFILE) ## Run `cppcheck`
 		--suppress=useStlAlgorithm \
 		`$(GIT_SOURCES)`
 
-.PHONY: lint/tidy
-lint/tidy: $(MAKEFILE) ## Run `clang-tidy`
+.PHONY: lint/clang-tidy
+lint/clang-tidy: $(CMAKE_CACHE) ## Run `clang-tidy`
 	clang-tidy \
 		-p="$(BUILD_DIR)" \
 		--warnings-as-errors=* \
 		`$(GIT_SOURCES)`
 
-.PHONY: lint/spell
-lint/spell: ## Check spelling using `codespell`
+.PHONY: lint/codespell
+lint/codespell: ## Check spelling using `codespell`
 	codespell \
 		`git ls-files -- "*.md" "*.txt" "*.json" "*.yml" "Makefile"` \
 		`$(GIT_SOURCES)`
 
-# Profilers
+# Sanitizers
 
-.PHONY: profile
-profile: ## Run all profilers on test executable
-	$(MAKE) profile/address
-	$(MAKE) profile/undefined
+.PHONY: sanitize
+sanitize: ## Run all sanitizers on test executable
+	$(MAKE) sanitize/asan
+	$(MAKE) sanitize/ubsan
 
-.PHONY: profile/address
-profile/address: ## Run address sanitizer on test executable
+.PHONY: sanitize/asan
+sanitize/asan: ## Run address sanitizer on test executable
 	$(MAKE) BUILD_TYPE=Asan ASAN_OPTIONS=detect_container_overflow=0 test
 
-.PHONY: profile/undefined
-profile/undefined: ## Run undefined behavior sanitizer on test executable
+.PHONY: sanitize/ubsan
+sanitize/ubsan: ## Run undefined behavior sanitizer on test executable
 	$(MAKE) BUILD_TYPE=Ubsan test
 
 # Tree
