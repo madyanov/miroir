@@ -14,7 +14,6 @@ default: $(BUILD_DIR)/miroir_test ## Build test executable (default)
 
 $(CHECK_BUILD_TYPE):
 	$(RM) "$(BUILD_DIR)"/BUILD.*
-	$(RM) "$(CMAKE_CACHE)"
 	mkdir -p "$(BUILD_DIR)"
 	touch "$@"
 
@@ -25,7 +24,6 @@ $(CMAKE_CACHE): CMakeLists.txt $(CHECK_BUILD_TYPE) $(CHECK_FORMAT)
 		-G "Unix Makefiles" \
 		-D CMAKE_BUILD_TYPE="$(BUILD_TYPE)" \
 		-D CMAKE_EXPORT_COMPILE_COMMANDS=ON
-	touch "$@"
 
 $(BUILD_DIR)/miroir_test: $(CMAKE_CACHE) $(SOURCES)
 	cmake \
@@ -33,7 +31,6 @@ $(BUILD_DIR)/miroir_test: $(CMAKE_CACHE) $(SOURCES)
 		--config "$(BUILD_TYPE)" \
 		--target miroir_test \
 		--parallel
-	touch "$@"
 
 # Helpers
 
