@@ -1,7 +1,9 @@
 BUILD_TYPE ?= Debug
 BUILD_DIR := build
 
-CMAKE_CACHE := $(BUILD_DIR)/CMakeCache.txt
+CMAKE_CACHE := $(BUILD_DIR)/CMakeCache.txt \
+			   $(BUILD_DIR)/Makefile \
+			   $(BUILD_DIR)/compile_commands.json
 
 GIT_SOURCES := git ls-files -- "*.?pp"
 SOURCES := $(shell $(GIT_SOURCES))
