@@ -166,3 +166,4 @@ root:
 - Use [cgen](https://gitlab.com/madyanov/cgen) to generate the `CMakeLists.txt` file
 - Run all CI checks locally with `make ci`
 - List available Make targets with `make help`
+- Be sure not to use almost 20-years-old default Make 3.81 on macOS
