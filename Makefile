@@ -47,12 +47,12 @@ test: $(BUILD_DIR)/miroir_test ## Run test executable
 .PHONY: clang
 clang: export CC=clang
 clang: export CXX=clang++
-clang: clean $(CMAKE_CACHE) ## Configure with Clang compiler
+clang: clean $(CMAKE_CACHE) ## Configure with Clang
 
 .PHONY: gcc
 gcc: export CC=gcc
 gcc: export CXX=g++
-gcc: clean $(CMAKE_CACHE) ## Configure with GCC compiler
+gcc: clean $(CMAKE_CACHE) ## Configure with GCC
 
 # Format
 
