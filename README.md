@@ -40,14 +40,14 @@ for (const auto &err : errors) {
 
 ```
 
-Real-life usage example:
+Real-life usage examples:
 
 - [Loading](https://gitlab.com/madyanov/cgen/-/blob/master/src/libcgen/config.cpp#L113) and [validation](https://gitlab.com/madyanov/cgen/-/blob/master/src/libcgen/config.cpp#L123)
 - [Schema](https://gitlab.com/madyanov/cgen/-/blob/master/src/libcgen/cgen.schema.yml.in) and [conforming document](https://gitlab.com/madyanov/cgen/-/blob/master/.cgen.yml)
 
 ## Built-in types
 
-> :information_source: Quoted values are always represent a string.
+> :warning: Quoted values are always represent a string.
 
 <table>
 <tr>
@@ -66,7 +66,6 @@ scalar  # any scalar
 ```yml
 numeric
 num
-
 integer
 int
 ```
@@ -77,7 +76,6 @@ int
 ```yml
 boolean
 bool
-
 string
 str
 ```
@@ -90,12 +88,14 @@ str
 
 > :boom: Creating a `miroir::Validator` with invalid schema can lead to assertion failures on `Debug` builds and undefined behavior or crashes on `Release` builds.
 
-```yml
+### Settings
 
-# schema settings, optional
-# defines validator behavior
+Defines validation behavior and schema format. *Optional*.
+
+```yml
 settings:
     default_required: bool      # all fields are required unless otherwise specified, default: true
+    ignore_attributes: bool     # ignore key attributes, default: false
     optional_tag: string        # tag to mark optional fields, default: "optional"
     required_tag: string        # tag to mark required fields, default: "required"
     embed_tag: string           # tag to mark embedded fields, default: "embed"
@@ -103,11 +103,16 @@ settings:
     key_type_prefix: char       # prefix to mark typed keys, default: "$"
     generic_brackets: char[2]   # generic type specifiers, default: "<>"
     generic_separator: char     # generic arguments separator, default: ";"
-    ignore_attributes: bool     # ignore key attributes, default: false
+```
 
-# custom types, optional
+### Types
+
+Custom types. *Optional*.
+
+```yml
 types:
     # types can be generic
+    # note that there's no space next to generic arguments separator
     list<T>: [T]
     map<K;V>: { $K: V }
     bool_list: list<bool>           # same as `[bool]`
@@ -151,14 +156,17 @@ types:
     # following type key takes values: red, gree or blue
     color_descriptions:
         $color: string
+```
 
-# document schema, required
-# represents document format
+### Document root
+
+Represents document format. *Required*.
+
+```yml
 root:
     date: !optional string
     cars: [self_driving_car]
     colors: !embed color_descriptions
-
 ```
 
 ## Contributing
@@ -166,3 +174,4 @@ root:
 - Use [cgen](https://gitlab.com/madyanov/cgen) to generate the `CMakeLists.txt` file
 - Run all CI checks locally with `make ci`
 - List available Make targets with `make help`
+- Be sure not to use almost 20-years-old default Make 3.81 on macOS
