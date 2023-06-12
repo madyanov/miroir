@@ -8,7 +8,7 @@ Features:
 - Type and value variants
 - No runtime dependencies (well, technically)
 
-Designed to work with [yaml-cpp](https://github.com/jbeder/yaml-cpp), but can be used with any library for which the [`miroir::NodeAccessor template`](https://gitlab.com/madyanov/miroir/-/blob/master/include/miroir/miroir.hpp#L15) specialization exists.
+Designed to work with [yaml-cpp](https://github.com/jbeder/yaml-cpp), but can be used with any library for which the [`miroir::NodeAccessor` template](https://gitlab.com/madyanov/miroir/-/blob/master/include/miroir/miroir.hpp#L15) specialization exists.
 
 ## Requirements
 
