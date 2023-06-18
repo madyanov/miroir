@@ -1,6 +1,6 @@
 # miroir
 
-YAML schema validator for C++.
+YAML schema validation library for C++.
 
 Features:
 
