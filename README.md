@@ -4,8 +4,8 @@ YAML schema validator for C++.
 
 Features:
 
-- Custom and generic types
-- Type and value variants
+- Custom and generic types support
+- Type and value variants support
 - No runtime dependencies (well, technically)
 
 Designed to work with [yaml-cpp](https://github.com/jbeder/yaml-cpp), but can be used with any library for which the [`miroir::NodeAccessor` template](https://gitlab.com/madyanov/miroir/-/blob/master/include/miroir/miroir.hpp#L15) specialization exists.
