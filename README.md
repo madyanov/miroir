@@ -47,7 +47,7 @@ Real-life usage example:
 
 ## Built-in types
 
-> :information_source: Quoted values are always represent a string.
+> :warning: Quoted values are always represent a string.
 
 <table>
 <tr>
