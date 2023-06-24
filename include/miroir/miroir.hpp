@@ -38,7 +38,7 @@ template <typename Node> struct NodeAccessor {
 
     // returns tag of the node
     static auto tag(const Node &node) -> std::string;
-    // returns string representations of the node
+    // returns string representation of the node
     static auto dump(const Node &node) -> std::string;
 
     // returns true if both nodes have the same content
