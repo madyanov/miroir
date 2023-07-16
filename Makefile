@@ -8,7 +8,7 @@ CMAKE_CACHE := $(BUILD_DIR)/CMakeCache.txt \
 GIT_SOURCES := git ls-files -- "*.?pp"
 SOURCES := $(shell $(GIT_SOURCES))
 
-CHECK_BUILD_TYPE := $(BUILD_DIR)/BUILD.$(shell echo $(BUILD_TYPE))
+CHECK_BUILD_TYPE := $(BUILD_DIR)/BUILD.$(BUILD_TYPE)
 CHECK_FORMAT := $(BUILD_DIR)/FORMAT
 
 .PHONY: default
@@ -84,12 +84,14 @@ lint: ## Run all linters
 lint/cppcheck: $(CMAKE_CACHE) ## Run `cppcheck`
 	cppcheck \
 		--cppcheck-build-dir="$(BUILD_DIR)" \
+		--check-level=exhaustive \
 		--error-exitcode=1 \
 		--enable=all \
 		--language=c++ \
 		--std=c++20 \
 		--inline-suppr \
 		--suppress=unmatchedSuppression \
+		--suppress=missingInclude \
 		--suppress=missingIncludeSystem \
 		--suppress=unusedStructMember \
 		--suppress=unusedFunction \
